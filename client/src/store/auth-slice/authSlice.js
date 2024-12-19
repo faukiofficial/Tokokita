@@ -7,7 +7,7 @@ const API_ADDRESS_URL = import.meta.env.VITE_BACKEND_URL;
 const AUTH_URL = API_ADDRESS_URL + "/api/user";
 
 const initialState = {
-  isAuthenticated: false,
+  isAuthenticated: true,
   isLoading: false,
   loginLoading: false,
   editProfileLoading: false,

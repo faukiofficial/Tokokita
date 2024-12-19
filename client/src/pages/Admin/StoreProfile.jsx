@@ -227,7 +227,7 @@ const StoreProfile = () => {
 
   return (
     <div className="w-full p-6 bg-white shadow-md">
-      <h2 className="text-2xl font-semibold my-4">Profil Toko</h2>
+      <h2 className="text-2xl font-bold text-primary mb-6">Store Profile</h2>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

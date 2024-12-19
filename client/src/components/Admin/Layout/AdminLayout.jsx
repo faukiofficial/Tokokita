@@ -14,7 +14,7 @@ import { IoIosLogOut } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../store/auth-slice/authSlice";
 import { AiOutlineLoading } from "react-icons/ai";
-import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
+import { FaAngleUp, FaAngleDown, FaRegUser } from "react-icons/fa6";
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -35,6 +35,8 @@ const AdminLayout = () => {
         return "Orders";
       case "/admin/admin-profile":
         return "Admin Profile";
+      case "/admin/store-profile":
+        return "Store Profile";
       default:
         return "";
     }
@@ -86,6 +88,10 @@ const AdminLayout = () => {
       icon: <IoBagAddOutline className="text-xl" />,
     },
     {
+      to: "admin-profile",
+      icon: <FaRegUser className="text-xl" />,
+    },
+    {
       to: "store-profile",
       icon: <IoSettingsOutline className="text-xl" />,
     },
@@ -110,12 +116,14 @@ const AdminLayout = () => {
   };
 
   function getFirstTwoWords(sentence) {
-    const words = sentence.split(" "); 
-    return words.slice(0, 2).join("+");
+    if (sentence) {
+      const words = sentence.split(" ");
+      return words.slice(0, 2).join("+");
+    }
   }
 
   const userAvatarLink = `https://avatar.iran.liara.run/username?username=${getFirstTwoWords(
-    user.fullName
+    user?.fullName
   )}&background=f4d9b2&color=FF9800`;
 
   return (
@@ -140,16 +148,16 @@ const AdminLayout = () => {
           onClick={() => navigate("/admin/admin-profile")}
         >
           <img
-            src={user.profilePicture?.url || userAvatarLink}
-            alt={user.fullName}
+            src={user?.profilePicture?.url || userAvatarLink}
+            alt={user?.fullName}
             width={35}
             height={35}
             className="rounded-full"
             style={{ objectFit: "cover", aspectRatio: "1/1" }}
           />
           <div className="flex flex-col">
-            <span className="hover:underline">{user.fullName}</span>
-            {user.role === "admin" && (
+            <span className="hover:underline">{user?.fullName}</span>
+            {user?.role === "admin" && (
               <span className="bg-slate-100 border rounded-full text-sm w-[3.5rem] text-center">
                 Admin
               </span>

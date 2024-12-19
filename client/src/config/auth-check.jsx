@@ -43,11 +43,11 @@ const AdminRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !user && !checkAuthLoading) {
     return <Navigate to="/auth/login" />;
   }
 
-  if (user?.role !== "admin") {
+  if (user?.role === "user" && !checkAuthLoading) {
     return <Navigate to="/shop/products" />;
   }
 
@@ -61,11 +61,11 @@ const UserRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !user && !checkAuthLoading) {
     return <Navigate to="/auth/login" />;
   }
 
-  if (user?.role !== "user") {
+  if (user?.role === "admin" && !checkAuthLoading) {
     return <Navigate to="/admin/products" />;
   }
 

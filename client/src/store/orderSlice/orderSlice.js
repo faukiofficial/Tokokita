@@ -250,6 +250,18 @@ const checkoutSlice = createSlice({
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.isUpdatingStatus = false;
         state.updateStatusSuccess = true;
+        state.orders = state.orders.map((order) => {
+          if (order._id === action.payload.order._id) {
+            return {
+              ...order,
+              status: action.payload.order.status,
+              trackingCode: action.payload.order.trackingCode,
+              updatedAt: action.payload.order.updatedAt,
+            };
+          }
+          return order;
+        })
+
         const updatedOrder = action.payload.order;
 
         if (updatedOrder) {
@@ -260,6 +272,7 @@ const checkoutSlice = createSlice({
             state.userOrders[userOrderIndex] = {
               ...state.userOrders[userOrderIndex],
               status: updatedOrder.status,
+              trackingCode: updatedOrder.trackingCode,
               updatedAt: updatedOrder.updatedAt,
             };
           }
@@ -271,6 +284,7 @@ const checkoutSlice = createSlice({
             state.orders[orderIndex] = {
               ...state.orders[orderIndex],
               status: updatedOrder.status,
+              trackingCode: updatedOrder.trackingCode,
               updatedAt: updatedOrder.updatedAt,
             };
           }

@@ -253,7 +253,7 @@ const ProductTable = () => {
 
           <button
             className="bg-primary hover:bg-primary-hover text-white lg:px-2 lg:py-1 rounded border-2 border-primary"
-            onClick={() => (window.location.href = `/admin/add-product`)}
+            onClick={() => navigate(`/admin/add-product`)}
           >
             <div className="flex items-center justify-center gap-1 p-1 px-2 lg:px-0">
               <IoMdAdd className="text-xl" />{" "}
