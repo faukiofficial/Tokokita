@@ -155,6 +155,8 @@ const ShopLayout = () => {
         return "My Address";
       case `/shop/product/${id}`:
         return "Product Details";
+      case `/shop/payment`:
+        return "Payment";
       default:
         return "";
     }
