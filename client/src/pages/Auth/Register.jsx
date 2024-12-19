@@ -5,7 +5,6 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../store/auth-slice/authSlice";
-import { toast } from "react-toastify";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,17 +13,11 @@ const Register = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  const { logoutLoading, error, successMessage } = useSelector((state) => state.auth);
+  const { logoutLoading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
     document.title = "Register - Shopping App";
   }, [location]);
-
-  useEffect(() => {
-    if (successMessage) {
-      toast.success(successMessage);
-    }
-  }, [successMessage])
 
   const formik = useFormik({
     initialValues: {

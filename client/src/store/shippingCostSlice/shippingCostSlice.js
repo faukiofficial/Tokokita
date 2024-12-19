@@ -24,7 +24,6 @@ export const fetchShippingCosts = createAsyncThunk(
         `${API_URL}/api/rajaongkir/get-shipping-cost`,
         body
       );
-      console.log("response", response);
 
       return response.data.rajaongkir.results;
     } catch (error) {
