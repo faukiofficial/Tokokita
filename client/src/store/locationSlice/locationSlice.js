@@ -2,9 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = import.meta.env.VITE_PROD === "production"
-  ? import.meta.env.VITE_SHIPPING_API_URL
-  : "/api";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const initialState = {
   provinces: [],
@@ -17,12 +15,8 @@ export const fetchProvinces = createAsyncThunk(
   "location/fetchProvinces",
   async () => {
     try {
-      const response = await axios.get(`${API_URL}/starter/province`, {
-        headers: {
-          key: import.meta.env.VITE_RAJAONGKIR_KEY,
-        },
-      });
-      return response.data.rajaongkir.results;
+      const response = await axios.get(`${API_URL}/api/rajaongkir/provinces`);
+      return response.data.provinces;
     } catch (error) {
       toast.error(error.response.data.message);
       throw new Error(error.response.data.message);
@@ -34,14 +28,11 @@ export const fetchCities = createAsyncThunk(
   "location/fetchCities",
   async (provinceId) => {
     try {
-      const response = await axios.get(`${API_URL}/starter/city`, {
-        params: { province: provinceId },
-        headers: {
-          key: import.meta.env.VITE_RAJAONGKIR_KEY, 
-        },
+      const response = await axios.get(`${API_URL}/api/rajaongkir/cities`, {
+        params: { provinceId },
       });
-      
-      return response.data.rajaongkir.results;
+
+      return response.data.cities;
     } catch (error) {
       toast.error(error.response.data.message);
       throw new Error(error.response.data.message);

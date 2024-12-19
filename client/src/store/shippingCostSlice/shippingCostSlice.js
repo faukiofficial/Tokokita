@@ -2,10 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL =
-  import.meta.env.VITE_PROD === "production"
-    ? import.meta.env.VITE_SHIPPING_API_URL
-    : "/api";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const initialState = {
   costs: [],
@@ -16,22 +13,18 @@ const initialState = {
 export const fetchShippingCosts = createAsyncThunk(
   "shipping/fetchShippingCosts",
   async ({ origin, destination, weight, courier }) => {
+    const body = {
+      origin,
+      destination,
+      weight,
+      courier,
+    };
     try {
       const response = await axios.post(
-        `${API_URL}/starter/cost`,
-        new URLSearchParams({
-          origin,
-          destination,
-          weight,
-          courier,
-        }),
-        {
-          headers: {
-            key: import.meta.env.VITE_RAJAONGKIR_KEY,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
+        `${API_URL}/api/rajaongkir/get-shipping-cost`,
+        body
       );
+      console.log("response", response);
 
       return response.data.rajaongkir.results;
     } catch (error) {

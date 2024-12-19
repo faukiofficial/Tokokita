@@ -11,6 +11,7 @@ const cartUserRoute = require("./routes/CartRoutes");
 const addressRoute = require("./routes/AddressRoutes");
 const storeProfileRoute = require("./routes/StoreProfileRoutes");
 const orderRoute = require("./routes/OrderRoutes");
+const rajaongkirRoute = require("./routes/RajaongkirRouter");
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use("/api/cart", cartUserRoute);
 app.use("/api/address", addressRoute);
 app.use("/api/store-profile", storeProfileRoute)
 app.use("/api/order", orderRoute)
+app.use("/api/rajaongkir", rajaongkirRoute)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

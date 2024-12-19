@@ -1,5 +1,5 @@
 const Product = require("../models/ProductModel");
-const { imageUploadUtil, deleteImageUtil } = require("../config/cloudinary"); // Sesuaikan dengan lokasi file cloudinaryUtils.js
+const { imageUploadUtil, deleteImageUtil } = require("../config/cloudinary");
 
 // CREATE New Product
 exports.createProduct = async (req, res) => {
