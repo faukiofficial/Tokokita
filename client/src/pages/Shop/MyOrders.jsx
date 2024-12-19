@@ -12,6 +12,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useNavigate } from "react-router-dom";
 import { IoIosClose } from "react-icons/io";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
   const dispatch = useDispatch();
@@ -29,19 +30,8 @@ const MyOrders = () => {
   const {
     userOrders,
     isLoadingOrders,
-    errorMessage,
-    totalUserOrders,
     totalUserPages,
-    currentUserPage,
   } = useSelector((state) => state.order);
-
-  console.log(
-    "userOrders",
-    userOrders,
-    totalUserOrders,
-    totalUserPages,
-    currentUserPage
-  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -69,15 +59,13 @@ const MyOrders = () => {
 
   const handleConfirmPayment = async () => {
     if (!paymentProof) {
-      alert("Silakan unggah bukti transfer.");
+      toast.error("Silakan unggah bukti transfer.");
       return;
     }
 
     dispatch(
       uploadPaymentProof({ orderId: selectedOrder._id, paymentProof })
     );
-
-    console.log("Payment proof uploaded successfully", userOrders);
   };
 
   useEffect(() => {
@@ -111,14 +99,6 @@ const MyOrders = () => {
         <Skeleton count={3} height={100} width="100%" />
       </div>
     );
-  }
-
-  if (errorMessage) {
-    return <div>Error: {errorMessage}</div>;
-  }
-
-  if (!userOrders || userOrders.length === 0) {
-    return <div>No orders found.</div>;
   }
 
   return (

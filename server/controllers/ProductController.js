@@ -18,9 +18,8 @@ exports.createProduct = async (req, res) => {
     let images = [];
     if (req.files) {
       for (const file of req.files) {
-        // Upload image to Cloudinary directly from memory
         const uploadResult = await imageUploadUtil(file.buffer);
-        images.push(uploadResult.secure_url); // Save Cloudinary URL
+        images.push(uploadResult.secure_url);
       }
     }
 
@@ -41,7 +40,6 @@ exports.createProduct = async (req, res) => {
       .status(201)
       .json({ success: true, product, message: "Uploaded Succesfully" });
   } catch (error) {
-    console.log("Error in createProduct controller:", error.message);
     res.status(500).json({ success: false, message: "Upload Failed" });
   }
 };
@@ -56,11 +54,11 @@ exports.getProducts = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
 
-    // Validasi sortDirection
     const validSortDirections = [-1, 1];
-    const direction = validSortDirections.includes(sortDirection) ? sortDirection : -1;
+    const direction = validSortDirections.includes(sortDirection)
+      ? sortDirection
+      : -1;
 
-    // Query produk berdasarkan kategori dan pencarian
     const query = {};
     if (category) {
       query.category = category;
@@ -69,33 +67,43 @@ exports.getProducts = async (req, res) => {
       query.title = { $regex: search, $options: "i" };
     }
 
-    // Ambil produk dengan sorting dan pagination
     const products = await Product.find(query)
       .sort({ [sortField]: direction })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // Hitung total produk
     const totalProducts = await Product.countDocuments(query);
 
     res.json({
+      success: true,
+      message: "Products fetched successfully",
       products,
       totalProducts,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch products" });
   }
 };
-
 
 // Read One Product by Id
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    res.json({
+      success: true,
+      message: "Product fetched successfully",
+      product,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch product" });
   }
 };
 
@@ -107,7 +115,6 @@ exports.updateProductById = async (req, res) => {
       originalPrice,
       salePrice,
       description,
-      sold,
       weight,
       stock,
       category,
@@ -116,20 +123,21 @@ exports.updateProductById = async (req, res) => {
     } = req.body;
 
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
-    // Hapus gambar yang dihapus oleh user dari Cloudinary
     if (deletedImages) {
       const imagesToDelete = JSON.parse(deletedImages);
       if (imagesToDelete.length > 0) {
         await Promise.all(
           imagesToDelete.map(async (image) => {
             const publicId = image.split("/").slice(-1)[0].split(".")[0];
-            await deleteImageUtil(publicId); // Hapus dari Cloudinary
+            await deleteImageUtil(publicId);
           })
         );
 
-        // Hapus gambar dari database
         product.images = product.images.filter(
           (img) => !imagesToDelete.includes(img)
         );
@@ -138,18 +146,15 @@ exports.updateProductById = async (req, res) => {
 
     if (req.files) {
       for (const file of req.files) {
-        // Upload new image to Cloudinary directly from memory
         const uploadResult = await imageUploadUtil(file.buffer);
-        product.images.push(uploadResult.secure_url); // Save Cloudinary URL
+        product.images.push(uploadResult.secure_url);
       }
     }
 
-    // Update other fields
     product.title = title;
     product.originalPrice = originalPrice;
     product.salePrice = salePrice;
     product.description = description;
-    product.sold = sold;
     product.weight = weight;
     product.stock = stock;
     product.category = category;
@@ -161,7 +166,6 @@ exports.updateProductById = async (req, res) => {
       .status(200)
       .json({ success: true, product, message: "Updated Succesfully" });
   } catch (error) {
-    console.log("Error in updateProductById controller:", error.message);
     res.status(500).json({ success: false, message: "Update Failed" });
   }
 };
@@ -170,9 +174,11 @@ exports.updateProductById = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
-    // Delete images from Cloudinary
     if (product.images.length > 0) {
       await Promise.all(
         product.images.map(async (image) => {
@@ -183,8 +189,10 @@ exports.deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted" });
+    res.json({ success: true, message: "Product deleted" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete product" });
   }
 };

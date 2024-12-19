@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_ADDRESS_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -20,7 +21,6 @@ const initialState = {
   proofUploadError: null,
 };
 
-// Async Thunk for checking out selected items
 export const checkout = createAsyncThunk(
   "/order/checkout",
   async ({ orderData }) => {
@@ -35,15 +35,17 @@ export const checkout = createAsyncThunk(
           withCredentials: true,
         }
       );
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return response.data;
     } catch (error) {
-      console.log("Error di checkout slice", error);
-      throw new Error(error.response?.data?.message || "Failed to checkout");
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// Async Thunk for get all orders
 export const getAllOrders = createAsyncThunk(
   "/order/getAllOrders",
   async ({ page = 1, limit = 10 }) => {
@@ -54,15 +56,12 @@ export const getAllOrders = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.log("Error di getAllOrders slice", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to get all orders"
-      );
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// Async Thunk for get user orders
 export const getUserOrders = createAsyncThunk(
   "/order/getUserOrders",
   async ({ page = 1, limit = 10 }) => {
@@ -76,15 +75,12 @@ export const getUserOrders = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      console.log("Error di getUserOrders slice", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to get user orders"
-      );
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// Async Thunk untuk mengunggah bukti transfer
 export const uploadPaymentProof = createAsyncThunk(
   "/order/uploadPaymentProof",
   async ({ orderId, paymentProof }) => {
@@ -104,12 +100,14 @@ export const uploadPaymentProof = createAsyncThunk(
         }
       );
 
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+
       return response.data;
     } catch (error) {
-      console.log("Error in uploadPaymentProof thunk", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to upload payment proof ddd"
-      );
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -117,11 +115,15 @@ export const uploadPaymentProof = createAsyncThunk(
 // Async Thunk untuk mengubah status order
 export const updateOrderStatus = createAsyncThunk(
   "/order/updateOrderStatus",
-  async ({ orderId, newStatus, trackingCode }) => {
+  async ({ orderId, newStatus, trackingCode, products }) => {
     try {
       const payload = { newStatus };
       if (newStatus === "ondelivery" && trackingCode) {
         payload.trackingCode = trackingCode;
+      }
+
+      if (newStatus === "process" && products) {
+        payload.products = products;
       }
 
       const response = await axios.put(
@@ -134,12 +136,15 @@ export const updateOrderStatus = createAsyncThunk(
           withCredentials: true,
         }
       );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+
       return response.data;
     } catch (error) {
-      console.log("Error di updateOrderStatus thunk", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to update order status"
-      );
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -147,9 +152,7 @@ export const updateOrderStatus = createAsyncThunk(
 const checkoutSlice = createSlice({
   name: "checkout",
   initialState,
-  reducers: {
-    setOrder: (state, action) => {},
-  },
+  reducers: { },
   extraReducers: (builder) => {
     builder
       .addCase(checkout.pending, (state) => {
@@ -280,7 +283,5 @@ const checkoutSlice = createSlice({
       });
   },
 });
-
-export const { setOrder } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

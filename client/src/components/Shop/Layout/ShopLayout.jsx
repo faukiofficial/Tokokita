@@ -4,6 +4,7 @@ import {
   Outlet,
   useLocation,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 import { SlLogout } from "react-icons/sl";
 import { AiOutlineProduct } from "react-icons/ai";
@@ -18,7 +19,6 @@ import { VscAccount } from "react-icons/vsc";
 import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
 import { MdOutlineLocalShipping } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
-import Cookies from "js-cookie";
 import {
   getCart,
   updateCartItem,
@@ -38,7 +38,8 @@ const ShopLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { isLoading, user } = useSelector((state) => state.auth);
+  const { logoutLoading, user } = useSelector((state) => state.auth);
+  
   const {
     cart,
     isUpdating: addTocartLoading,
@@ -138,6 +139,8 @@ const ShopLayout = () => {
     });
   };
 
+  const {id} = useParams();
+
   const getBreadcrumb = () => {
     switch (location.pathname) {
       case "/shop/products":
@@ -148,6 +151,10 @@ const ShopLayout = () => {
         return "My Profile";
       case "/shop/checkout":
         return "Checkout";
+      case "/shop/my-address":
+        return "My Address";
+      case `/shop/product/${id}`:
+        return "Product Details";
       default:
         return "";
     }
@@ -155,7 +162,6 @@ const ShopLayout = () => {
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    window.location.href = "/auth/login";
   };
 
   const navLinks = [
@@ -406,7 +412,7 @@ const ShopLayout = () => {
               onClick={handleLogout}
             >
               <div className="flex items-center justify-center gap-2">
-                {isLoading && (
+                {logoutLoading && (
                   <span className="animate-spin text-xl">
                     <AiOutlineLoading />
                   </span>

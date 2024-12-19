@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_ADDRESS_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -7,68 +8,102 @@ const AUTH_URL = API_ADDRESS_URL + "/api/user";
 
 const initialState = {
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
+  loginLoading: false,
+  editProfileLoading: false,
+  logoutLoading: false,
+  checkAuthLoading: false,
   user: null,
 };
 
 export const registerUser = createAsyncThunk(
   "/auth/register",
   async (formData) => {
+    try {
+      const response = await axios.post(
+        `${AUTH_URL}/register`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+      return response.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk("/auth/login", async (formData) => {
+  try {
     const response = await axios.post(
-      `${AUTH_URL}/register`,
+      `${AUTH_URL}/login`,
       formData,
       {
         withCredentials: true,
       }
     );
-
-    return response.data;
-  }
-);
-
-export const loginUser = createAsyncThunk("/auth/login", async (formData) => {
-  const response = await axios.post(
-    `${AUTH_URL}/login`,
-    formData,
-    {
-      withCredentials: true,
+    
+    if (response.data.success) {
+      toast.success(response.data.message);
     }
-  );
-
-  return response.data;
+  
+    return response.data;
+  } catch (error) {
+    toast.error(error.response.data.message);
+    throw new Error(error.response.data.message);
+  }
 });
 
 // Logout
 export const logoutUser = createAsyncThunk("/auth/logout", async () => {
-  const response = await axios.post(
-    `${AUTH_URL}/logout`,
-    {},
-    {
-      withCredentials: true,
+  try {
+    const response = await axios.post(
+      `${AUTH_URL}/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+    
+    if (response.data.success) {
+      toast.success(response.data.message);
     }
-  );
-
-  return response.data;
+  
+    return response.data;
+  } catch (error) {
+    toast.error(error.response.data.message);
+    throw new Error(error.response.data.message);
+  }
 });
 
 // Edit Profile action
 export const editProfile = createAsyncThunk(
   "/auth/editProfile",
   async ({ userId, formData }) => {
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
+    try {
+      const response = await axios.put(
+        `${AUTH_URL}/edit-profile/${userId}`,
+        formData,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-    const response = await axios.put(
-      `${AUTH_URL}/edit-profile/${userId}`,
-      formData,
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
+      if (response.data.success) {
+        toast.success(response.data.message);
       }
-    );
-
-    return response.data.user;
+  
+      return response.data.user;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
   }
 );
 
@@ -76,39 +111,49 @@ export const editProfile = createAsyncThunk(
 export const deleteProfile = createAsyncThunk(
   "/auth/deleteProfile",
   async ({ userId }) => {
-    console.log('id delete', userId);
-    
-    const response = await axios.delete(
-      `${AUTH_URL}/delete-profile/${userId}`,
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    try {
+      const response = await axios.delete(
+        `${AUTH_URL}/delete-profile/${userId}`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    return response.data;
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+  
+      return response.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
   }
 );
 
 export const checkAuth = createAsyncThunk("/auth/checkauth", async () => {
-  const response = await axios.get(
-    `${AUTH_URL}/check-auth`,
-    {
-      withCredentials: true,
-    }
-  );
-
-  return response.data;
+  try {
+    const response = await axios.get(
+      `${AUTH_URL}/check-auth`,
+      {
+        withCredentials: true,
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    toast.error(error.response.data.message);
+    throw new Error(error.response.data.message); 
+  }
 });
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    setUser: (state, action) => {},
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
@@ -125,49 +170,53 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       })
       .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
+        state.loginLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loginLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
       })
       .addCase(loginUser.rejected, (state) => {
-        state.isLoading = false;
+        state.loginLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
       .addCase(logoutUser.pending, (state) => {
-        state.isLoading = true;
+        state.logoutLoading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.isLoading = false;
+        state.logoutLoading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.logoutLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
       .addCase(checkAuth.pending, (state) => {
-        state.isLoading = true;
+        state.checkAuthLoading = true;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
-        console.log("Check Auth Payload:", action.payload);
-        state.isLoading = false;
+        state.checkAuthLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
       })
       .addCase(checkAuth.rejected, (state) => {
-        state.isLoading = false;
+        state.checkAuthLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
       .addCase(editProfile.pending, (state) => {
-        state.isLoading = true;
+        state.editProfileLoading = true;
       })
       .addCase(editProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.editProfileLoading = false;
         state.user = action.payload;
       })
       .addCase(editProfile.rejected, (state) => {
-        state.isLoading = false;
+        state.editProfileLoading = false;
       })
       .addCase(deleteProfile.pending, (state) => {
         state.isLoading = true;
@@ -182,7 +231,5 @@ const authSlice = createSlice({
       });
   },
 });
-
-export const { setUser } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -30,8 +30,6 @@ const Cart = ({
   const [stockMessage, setStockMessage] = useState("");
   const [alertShow, setAlertShow] = useState(false);
 
-  console.log("selected", selectedItemsFK);
-
   const handleCheckout = () => {
     navigate("/shop/checkout", {
       state: {
@@ -55,7 +53,7 @@ const Cart = ({
             Your Cart
           </h2>
           <div className="cart-items-container flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
-            {cart?.items.length > 0 ? (
+            {cart?.items?.length > 0 ? (
               cart?.items?.map((item) => (
                 <div
                   key={item._id}

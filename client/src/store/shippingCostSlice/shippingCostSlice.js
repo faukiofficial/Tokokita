@@ -1,10 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
-
-const API_URL = import.meta.env.VITE_PROD === "production"
-  ? import.meta.env.VITE_SHIPPING_API_URL
-  : "/api";
+const API_URL =
+  import.meta.env.VITE_PROD === "production"
+    ? import.meta.env.VITE_SHIPPING_API_URL
+    : "/api";
 
 const initialState = {
   costs: [],
@@ -15,36 +16,35 @@ const initialState = {
 export const fetchShippingCosts = createAsyncThunk(
   "shipping/fetchShippingCosts",
   async ({ origin, destination, weight, courier }) => {
-    const response = await axios.post(
-      `${API_URL}/starter/cost`,
-      new URLSearchParams({
-        origin,
-        destination,
-        weight,
-        courier,
-      }),
-      {
-        headers: {
-          key: import.meta.env.VITE_RAJAONGKIR_KEY,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    try {
+      const response = await axios.post(
+        `${API_URL}/starter/cost`,
+        new URLSearchParams({
+          origin,
+          destination,
+          weight,
+          courier,
+        }),
+        {
+          headers: {
+            key: import.meta.env.VITE_RAJAONGKIR_KEY,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
-    return response.data.rajaongkir.results;
+      return response.data.rajaongkir.results;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
   }
 );
 
 const shippingCostSlice = createSlice({
   name: "shipping",
   initialState,
-  reducers: {
-    resetShippingState: (state) => {
-      state.costs = [];
-      state.isLoading = true;
-      state.error = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchShippingCosts.pending, (state) => {
@@ -62,5 +62,4 @@ const shippingCostSlice = createSlice({
   },
 });
 
-export const { resetShippingState } = shippingCostSlice.actions;
 export default shippingCostSlice.reducer;

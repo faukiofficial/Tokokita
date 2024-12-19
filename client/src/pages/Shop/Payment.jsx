@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import formatNumber from "../../components/helpers/formatNumber";
 import { useDispatch, useSelector } from "react-redux";
 import { uploadPaymentProof } from "../../store/orderSlice/orderSlice";
+import toast from "react-hot-toast";
 
 const PaymentPage = () => {
   const [paymentProof, setPaymentProof] = useState(null);
@@ -52,7 +53,7 @@ const PaymentPage = () => {
 
   const handleConfirmPayment = async () => {
     if (!paymentProof) {
-      alert("Silakan unggah bukti transfer.");
+      toast.error("Silakan unggah bukti transfer.");
       return;
     }
 
@@ -177,7 +178,7 @@ const PaymentPage = () => {
               disabled={isUploadingProof}
               className="mt-4 bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded"
             >
-              {isUploadingProof ? "Mengunggah..." : "Confirm Payment"}
+              {isUploadingProof ? "Loading..." : "Confirm Payment"}
             </button>
           </div>
         </div>

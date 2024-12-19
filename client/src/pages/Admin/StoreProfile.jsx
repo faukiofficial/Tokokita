@@ -11,6 +11,7 @@ import {
   getStoreProfile,
   clearStoreProfile,
 } from "../../store/storeProfileSlice/storeProfileSlice";
+import toast from "react-hot-toast";
 
 const StoreProfile = () => {
   const dispatch = useDispatch();
@@ -97,7 +98,7 @@ const StoreProfile = () => {
         dispatch(fetchCities(storeProfile.alamat.kota.province_id))
           .unwrap()
           .catch((err) => {
-            console.log(err.message || "Gagal mengambil kota");
+            toast.error(err.message || "Gagal mengambil kota");
           });
       }
     }
@@ -134,7 +135,7 @@ const StoreProfile = () => {
         dispatch(fetchCities(value))
           .unwrap()
           .catch((err) => {
-            console.log(err.message || "Gagal mengambil city");
+            toast.error(err.message || "Gagal mengambil city");
           });
       }
     } else if (name === "city") {
@@ -169,7 +170,7 @@ const StoreProfile = () => {
 
     for (let field of requiredFields) {
       if (!formData[field]) {
-        console.log(`Field ${field} harus diisi`);
+        toast.error(`Field ${field} harus diisi`);
         return;
       }
     }
@@ -220,8 +221,7 @@ const StoreProfile = () => {
         ).unwrap();
       }
     } catch (err) {
-      console.log(err);
-      console.log(err.message || "Terjadi kesalahan pada saat submit");
+      toast.error(err.message || "Terjadi kesalahan pada saat submit");
     }
   };
 

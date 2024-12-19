@@ -45,7 +45,7 @@ const ProductTable = () => {
     totalProducts,
   } = useSelector((state) => state.product);
 
-  const {isAuthenticated} = useSelector((state) => state.auth)
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -76,7 +76,6 @@ const ProductTable = () => {
     page,
   ]);
 
-  // Set produk dan total halaman ketika allproducts berubah
   useEffect(() => {
     if (allproducts) {
       setSortedProducts(allproducts);
@@ -92,7 +91,7 @@ const ProductTable = () => {
     if (queryLimit) {
       const parsedLimit = parseInt(queryLimit, 10);
       if (!isNaN(parsedLimit)) {
-        setLimit(parsedLimit); // Set limit dari query jika valid
+        setLimit(parsedLimit);
       }
     }
     if (queryPage) {
@@ -105,29 +104,28 @@ const ProductTable = () => {
     } else {
       setPage(1);
     }
-  }, [location.search]); // Jalankan setiap kali query parameter di URL berubah
+  }, [location.search]);
 
   // Fungsi Search
   const handleSearch = () => {
     const queryParams = new URLSearchParams(location.search);
     setSearchQuery(search);
-    setPage(1); // Reset page to 1
+    setPage(1);
     queryParams.set("page", 1);
     navigate({ search: queryParams.toString() });
   };
 
-  // Jika search input kosong, reset produk
   useEffect(() => {
     if (search === "") {
-      setSearchQuery(""); // Atur ulang pencarian
+      setSearchQuery("");
     }
-  }, [search]); // Pantau perubahan nilai search
+  }, [search]);
 
   // Fungsi untuk mengubah kategori
   const handleCategoryChange = (e) => {
     const queryParams = new URLSearchParams(location.search);
     setSelectedCategory(e.target.value);
-    setPage(1); // Reset page to 1
+    setPage(1);
     queryParams.set("page", 1);
     navigate({ search: queryParams.toString() });
   };
@@ -152,10 +150,11 @@ const ProductTable = () => {
 
   // Fungsi untuk menambahkan titik pada angka
   const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if (num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
   };
 
-  ////////////////////////
   // Delete Product
   const deleteProduct = async (productId) => {
     if (!isAuthenticated) {
@@ -163,7 +162,7 @@ const ProductTable = () => {
       return;
     }
     try {
-      dispatch(deleteProductById({ productId }));;
+      dispatch(deleteProductById({ productId }));
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -171,7 +170,6 @@ const ProductTable = () => {
 
   useEffect(() => {
     if (successMessage) {
-      window.location.reload();
       setShowConfirm(false);
       setProductToDelete(null);
     }
@@ -179,7 +177,7 @@ const ProductTable = () => {
 
   const handleDeleteClick = (product) => {
     setProductToDelete(product);
-    setShowConfirm(true); // Tampilkan konfirmasi modal
+    setShowConfirm(true);
   };
 
   const confirmDelete = () => {
@@ -188,10 +186,8 @@ const ProductTable = () => {
 
   const cancelDelete = () => {
     setShowConfirm(false);
-    setProductToDelete(null); // Reset saat dibatalkan
+    setProductToDelete(null);
   };
-
-  ////////////////////////////
 
   // Fungsi untuk pindah halaman melalui tombol
   const handlePageChange = (newPage) => {
@@ -199,7 +195,7 @@ const ProductTable = () => {
     setPage(newPage);
     queryParams.set("page", newPage);
     queryParams.set("limit", limit);
-    navigate({ search: queryParams.toString() }); // Update URL
+    navigate({ search: queryParams.toString() });
   };
 
   // Fungsi untuk mengubah limit
@@ -207,10 +203,10 @@ const ProductTable = () => {
     const queryParams = new URLSearchParams(location.search);
     const newLimit = parseInt(e.target.value, 10);
     setLimit(newLimit);
-    setPage(1); // Reset halaman ke 1 ketika limit berubah
-    queryParams.set("limit", newLimit); // Set limit ke query
-    queryParams.set("page", 1); // Set page ke 1 di query saat limit berubah
-    navigate({ search: queryParams.toString() }); // Update URL
+    setPage(1);
+    queryParams.set("limit", newLimit);
+    queryParams.set("page", 1);
+    navigate({ search: queryParams.toString() });
   };
 
   return (
@@ -257,9 +253,7 @@ const ProductTable = () => {
 
           <button
             className="bg-primary hover:bg-primary-hover text-white lg:px-2 lg:py-1 rounded border-2 border-primary"
-            onClick={() =>
-              (window.location.href = `/admin/add-product`)
-            }
+            onClick={() => (window.location.href = `/admin/add-product`)}
           >
             <div className="flex items-center justify-center gap-1 p-1 px-2 lg:px-0">
               <IoMdAdd className="text-xl" />{" "}
@@ -297,7 +291,7 @@ const ProductTable = () => {
           {/* Pagination Controls */}
           <div className="lg:mt-2 flex justify-end items-center gap-2 p-2 lg:p-0">
             <select
-              value={limit} // Menampilkan nilai limit saat ini
+              value={limit}
               onChange={handleLimitChange}
               className="border p-[2px] rounded focus:outline-none text-sm"
             >

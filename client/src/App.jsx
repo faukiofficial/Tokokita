@@ -5,7 +5,7 @@ import AdminLayout from "./components/Admin/Layout/AdminLayout";
 import Orders from "./pages/Admin/AllOrders";
 import Register from "./pages/Auth/Register";
 import Login from "./pages/Auth/Login";
-import { AdminRoute, UserRoute, AuthRoute } from "./config/auth-check";
+import { AdminRoute, UserRoute, AuthRoute, NoneProtectedRoute } from "./config/auth-check";
 import AuthLayout from "./components/Auth/AuthLayout";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
@@ -33,7 +33,7 @@ function App() {
       <Route path="/" element={<Navigate to="/shop/products" />} />
       <Route path="/shop" element={<Navigate to="/shop/products" />} />
       <Route path="/admin" element={<Navigate to="/admin/products" />} />
-      <Route path="/shop" element={<ShopLayout />}>
+      <Route path="/shop" element={<NoneProtectedRoute><ShopLayout /></NoneProtectedRoute>}>
         <Route path="products" element={<ShoppingHome />} />
         <Route path="product/:id" element={<DetailProduct />} />
         <Route path="checkout" element={<UserRoute><Checkout /></UserRoute>} />

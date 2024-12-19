@@ -8,9 +8,9 @@ const {
   updateProductById,
   deleteProduct,
 } = require("../controllers/ProductController");
-const authMiddleware = require("../middlewares/authMiddleware");
+const checkAuth = require("../middlewares/checkAuth");
+const checkRole = require("../middlewares/checkRole");
 
-// Setup Multer for in-memory file storage
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -32,7 +32,7 @@ const upload = multer({
 
 router.post(
   "/products",
-  authMiddleware(['admin']),
+  checkAuth, checkRole(['admin']),
   upload.array("images", 5),
   createProduct
 );
@@ -40,10 +40,10 @@ router.get("/products", getProducts);
 router.get("/products/:id", getProductById);
 router.put(
   "/products/:id",
-  authMiddleware(['admin']),
+  checkAuth, checkRole(['admin']),
   upload.array("images", 5),
   updateProductById
 );
-router.delete("/products/:id", authMiddleware(['admin']), deleteProduct);
+router.delete("/products/:id", checkAuth, checkRole(['admin']), deleteProduct);
 
 module.exports = router;

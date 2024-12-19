@@ -3,6 +3,7 @@ import { FaSortDown } from "react-icons/fa6";
 import { CiEdit } from "react-icons/ci";
 import { MdDeleteOutline } from "react-icons/md";
 import "../../../styles/style.css";
+import { useNavigate } from "react-router-dom";
 
 const columns = [
   { key: "title", label: "Product" },
@@ -21,6 +22,7 @@ const ProductTableDesktop = ({
   handleDeleteClick,
   formatNumber,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="overflow-x-auto hidden lg:block">
       <table className="w-full table-auto border-collapse border border-gray-300">
@@ -127,7 +129,7 @@ const ProductTableDesktop = ({
                   <button
                     className="border border-primary-dark hover:bg-primary-light text-primary-dark hover:text-black px-3 py-1 rounded text-xl"
                     onClick={() =>
-                      (window.location.href = `/admin/edit-product?id=${product._id}`)
+                      navigate(`/admin/edit-product?id=${product._id}`)
                     }
                   >
                     <CiEdit />

@@ -1,6 +1,7 @@
 import "../../../styles/style.css";
 import { FaSortUp } from "react-icons/fa6";
 import { FaSortDown } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 const columns = [
   { key: "createdAt", label: "New" },
@@ -18,6 +19,7 @@ const ProductTableMobile = ({
   setSortDirection,
   sortConfig,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="lg:hidden">
       <div className="w-full bg-white flex">
@@ -112,7 +114,7 @@ const ProductTableMobile = ({
                 <button
                   className="bg-white text-black w-full px-3 py-1 border-[1px] border-primary"
                   onClick={() =>
-                    (window.location.href = `/admin/edit-product?id=${product._id}`)
+                    navigate(`/admin/edit-product?id=${product._id}`)
                   }
                 >
                   <span className="text-primary-dark font-semibold">Edit</span>

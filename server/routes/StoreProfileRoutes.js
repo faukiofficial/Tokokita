@@ -1,10 +1,10 @@
 const router = require('express').Router();
 const StoreProfileController = require('../controllers/StoreProfileController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const checkAuth = require("../middlewares/checkAuth");
+const checkRole = require("../middlewares/checkRole");
 
-// Routes for store data management
-router.post('/add', authMiddleware(['admin']), StoreProfileController.createStoreProfile);
+router.post('/add', checkAuth, checkRole(['admin']), StoreProfileController.createStoreProfile);
 router.get('/get', StoreProfileController.getStoreProfile);
-router.put('/update', authMiddleware(['admin']), StoreProfileController.updateStoreProfile);
+router.put('/update', checkAuth, checkRole(['admin']), StoreProfileController.updateStoreProfile);
 
 module.exports = router;

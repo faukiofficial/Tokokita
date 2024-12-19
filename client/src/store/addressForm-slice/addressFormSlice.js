@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_ADDRESS_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -12,7 +13,6 @@ const initialState = {
   error: null,
 };
 
-// 1. Get All Addresses
 export const getAllAddress = createAsyncThunk(
   "address/getAllAddress",
   async () => {
@@ -23,14 +23,12 @@ export const getAllAddress = createAsyncThunk(
 
       return response.data.addressList;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed get All address list";
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// 2. Get Address by ID
 export const getAddressById = createAsyncThunk(
   "address/getAddressById",
   async ({ id }) => {
@@ -38,16 +36,15 @@ export const getAddressById = createAsyncThunk(
       const response = await axios.get(`${ADDRESS_URL}/get/${id}`, {
         withCredentials: true,
       });
+
       return response.data.address;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to get address by ID";
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// 3. Add Address
 export const addNewAddress = createAsyncThunk(
   "address/addNewAddress",
   async ({ addressData }) => {
@@ -55,17 +52,17 @@ export const addNewAddress = createAsyncThunk(
       const response = await axios.post(`${ADDRESS_URL}/add`, addressData, {
         withCredentials: true,
       });
-      console.log("Add Address Response:", response.data);
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return response.data.address;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to create address";
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// 4. Update Address
 export const updateAddress = createAsyncThunk(
   "address/updateAddress",
   async ({ id, addressData }) => {
@@ -77,28 +74,31 @@ export const updateAddress = createAsyncThunk(
           withCredentials: true,
         }
       );
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return response.data.address;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to update address";
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
 
-// 5. Delete Address
 export const deleteAddress = createAsyncThunk(
   "address/deleteAddress",
   async ({ id }) => {
     try {
-      await axios.delete(`${ADDRESS_URL}/delete/${id}`, {
+      const response = await axios.delete(`${ADDRESS_URL}/delete/${id}`, {
         withCredentials: true,
       });
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return id;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to delete address";
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );

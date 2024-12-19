@@ -16,22 +16,11 @@ const AllOrders = () => {
   const [showPaymentProof, setShowPaymentProof] = useState(false);
   const [trackingCodes, setTrackingCodes] = useState({});
 
-  const {
-    orders,
-    isLoadingOrders,
-    errorMessage,
-    totalOrders,
-    totalPages,
-    currentPage: currentAdminPage,
-  } = useSelector((state) => state.order);
-  const {isAuthenticated} = useSelector((state) => state.auth)
-
-  console.log("orders", orders, totalOrders, totalPages, currentAdminPage);
+  const { orders, totalPages } = useSelector((state) => state.order);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
-
-
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -58,7 +47,6 @@ const AllOrders = () => {
     });
   };
 
-
   const handleSubmitTrackingCode = (orderId) => {
     const trackingCode = trackingCodes[orderId];
     if (!trackingCode) return;
@@ -69,21 +57,8 @@ const AllOrders = () => {
         newStatus: "ondelivery",
         trackingCode,
       })
-    )
+    );
   };
-
-
-  if (isLoadingOrders) {
-    return <div>Loading your orders...</div>;
-  }
-
-  if (errorMessage) {
-    return <div>Error: {errorMessage}</div>;
-  }
-
-  if (!orders || orders.length === 0) {
-    return <div>No orders found.</div>;
-  }
 
   return (
     <div className="w-full p-6 bg-white shadow-md">
@@ -169,7 +144,8 @@ const AllOrders = () => {
                     {order.paymentStatus} | {order.status}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {order.paymentStatus === "unpaid" && order.status !== "cancelled" &&
+                    {order.paymentStatus === "unpaid" &&
+                      order.status !== "cancelled" &&
                       "Waiting for payment . . ."}
                   </div>
                   <div className="text-sm text-gray-500">
@@ -195,13 +171,13 @@ const AllOrders = () => {
                         <div
                           className="hover:text-primary-hover underline text-primary cursor-pointer"
                           onClick={() => {
-                            console.log("order id nihhhh", order._id);
                             dispatch(
                               updateOrderStatus({
                                 orderId: order._id,
                                 newStatus: "process",
+                                products: order.items
                               })
-                            )
+                            );
                           }}
                         >
                           Process
@@ -214,7 +190,7 @@ const AllOrders = () => {
                                 orderId: order._id,
                                 newStatus: "cancelled",
                               })
-                            )
+                            );
                           }}
                         >
                           Cancel
@@ -260,7 +236,7 @@ const AllOrders = () => {
                                 orderId: order._id,
                                 newStatus: "completed",
                               })
-                            )
+                            );
                           }}
                         >
                           Complete
@@ -313,7 +289,7 @@ const AllOrders = () => {
 
       {showPaymentProof && selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="flex flex-col justify-between items-center bg-white mx-4 relative">
+          <div className="flex flex-col justify-between items-center bg-white mx-4 relative  max-w-[400px]">
             <div
               className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 absolute -top-2 -right-2"
               onClick={() => {

@@ -3,31 +3,25 @@ const StoreProfile = require("../models/StoreProfileModel");
 // Create Store Profile
 exports.createStoreProfile = async (req, res) => {
   try {
-    // Cek apakah StoreProfile sudah ada
     const existingProfile = await StoreProfile.findOne();
     if (existingProfile) {
       return res.status(400).json({
         success: false,
-        message:
-          "Store profile sudah ada. Gunakan update untuk mengubah profil.",
+        message: "Store profile already exists.",
       });
     }
 
     const { namaToko, nomorTelepon, email, alamat, mediaSosial } = req.body;
 
-    console.log('req.body', req.body);
-
-    // Parsing alamat jika dalam format string
     let parsedAlamat;
     try {
       parsedAlamat = typeof alamat === "string" ? JSON.parse(alamat) : alamat;
     } catch (parseError) {
       return res
         .status(400)
-        .json({ success: false, message: "Format alamat tidak valid." });
+        .json({ success: false, message: "Address format is invalid." });
     }
 
-    // Validasi data alamat
     if (
       !parsedAlamat ||
       !parsedAlamat.jalan ||
@@ -38,10 +32,9 @@ exports.createStoreProfile = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ success: false, message: "Data alamat tidak lengkap." });
+        .json({ success: false, message: "Address is incomplete." });
     }
 
-    // Validasi keberadaan objek provinsi dan kota
     if (
       !parsedAlamat.provinsi ||
       !parsedAlamat.provinsi.province_id ||
@@ -49,7 +42,7 @@ exports.createStoreProfile = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ success: false, message: "Provinsi tidak lengkap." });
+        .json({ success: false, message: "Province not complete." });
     }
 
     if (
@@ -61,10 +54,9 @@ exports.createStoreProfile = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ success: false, message: "Kota tidak lengkap." });
+        .json({ success: false, message: "City not complete." });
     }
 
-    // Buat StoreProfile baru
     const storeProfile = new StoreProfile({
       namaToko,
       nomorTelepon,
@@ -77,15 +69,13 @@ exports.createStoreProfile = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Store profile berhasil dibuat.",
+      message: "Store profile created successfully.",
       storeProfile,
     });
   } catch (error) {
-    console.error("Error di createStoreProfile controller:", error);
-    console.error(error.response ? error.response.data : error.message);
     res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan saat membuat profil toko.",
+      message: "Failed to create store profile.",
       error: error.message,
     });
   }
@@ -101,9 +91,9 @@ exports.getStoreProfile = async (req, res) => {
         message: "Anda belum menambahkan data store profile.",
       });
     }
-    res.status(200).json({ success: true, storeProfile });
+    res.status(200).json({ success: true, message: "Berhasil mengambil profil toko.", storeProfile });
   } catch (error) {
-    console.error("Error di getStoreProfile controller:", error);
+    console.log(error);
     res.status(500).json({
       success: false,
       message: "Terjadi kesalahan saat mengambil profil toko.",
@@ -124,14 +114,10 @@ exports.updateStoreProfile = async (req, res) => {
 
     const { namaToko, nomorTelepon, email, alamat, mediaSosial } = req.body;
 
-    console.log('req.body', req.body);
-
-    // Update field lainnya
     storeProfile.namaToko = namaToko || storeProfile.namaToko;
     storeProfile.nomorTelepon = nomorTelepon || storeProfile.nomorTelepon;
     storeProfile.email = email || storeProfile.email;
 
-    // Parsing dan Validasi alamat
     let parsedAlamat;
     if (alamat) {
       try {
@@ -142,7 +128,6 @@ exports.updateStoreProfile = async (req, res) => {
           .json({ success: false, message: "Format alamat tidak valid." });
       }
 
-      // Validasi data alamat
       if (
         !parsedAlamat ||
         !parsedAlamat.jalan ||
@@ -156,7 +141,6 @@ exports.updateStoreProfile = async (req, res) => {
           .json({ success: false, message: "Data alamat tidak lengkap." });
       }
 
-      // Validasi keberadaan objek provinsi dan kota
       if (
         !parsedAlamat.provinsi ||
         !parsedAlamat.provinsi.province_id ||
@@ -179,7 +163,6 @@ exports.updateStoreProfile = async (req, res) => {
           .json({ success: false, message: "Kota tidak lengkap." });
       }
 
-      // Update alamat jika valid
       storeProfile.alamat = {
         ...storeProfile.alamat,
         ...parsedAlamat,
@@ -188,7 +171,6 @@ exports.updateStoreProfile = async (req, res) => {
 
     // Parsing dan Validasi media sosial
     if (mediaSosial) {
-      // Pastikan mediaSosial adalah objek
       if (typeof mediaSosial !== "object") {
         return res.status(400).json({
           success: false,
@@ -201,7 +183,6 @@ exports.updateStoreProfile = async (req, res) => {
       };
     }
 
-    // Simpan perubahan
     await storeProfile.save();
 
     res.status(200).json({
@@ -210,7 +191,6 @@ exports.updateStoreProfile = async (req, res) => {
       storeProfile,
     });
   } catch (error) {
-    console.error("Error di updateStoreProfile controller:", error);
     res.status(500).json({
       success: false,
       message: "Terjadi kesalahan saat memperbarui profil toko.",

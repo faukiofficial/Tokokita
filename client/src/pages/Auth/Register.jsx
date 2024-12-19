@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { AiOutlineLoading } from "react-icons/ai";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../store/auth-slice/authSlice";
 import { toast } from "react-toastify";
@@ -12,8 +12,9 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const location = useLocation();
 
+  const navigate = useNavigate();
   const dispatch = useDispatch()
-  const { isLoading, error, successMessage } = useSelector((state) => state.auth);
+  const { logoutLoading, error, successMessage } = useSelector((state) => state.auth);
 
   useEffect(() => {
     document.title = "Register - Shopping App";
@@ -63,12 +64,17 @@ const Register = () => {
         .required("Confirm Password is required"),
     }),
     onSubmit: async (values) => {
-      dispatch(registerUser(values))
+      const result = await dispatch(registerUser(values))
+
+      if (result.meta.requestStatus === "fulfilled") {
+        formik.resetForm();
+        navigate("/auth/login");
+      }
     },
   });
 
   return (
-    <div className="min-h-screen flex justify-center items-center">
+    <div className="min-h-screen flex justify-center items-center mt-16">
       <div className="w-[500px] mx-auto p-5 border bg-white rounded-lg">
         <h2 className="text-2xl font-bold mb-4">Register</h2>
         <form onSubmit={formik.handleSubmit}>
@@ -212,10 +218,10 @@ const Register = () => {
             <button
               type="submit"
               className="bg-primary hover:bg-primary-hover text-white w-full py-2 rounded"
-              disabled={isLoading}
+              disabled={logoutLoading}
             >
               <div className="flex items-center justify-center gap-2">
-                {isLoading && (
+                {logoutLoading && (
                   <span className="animate-spin text-xl">
                     <AiOutlineLoading />
                   </span>

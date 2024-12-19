@@ -26,10 +26,20 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const AdminRoute = ({ children }) => {
-  const { isAuthenticated, user, isLoading } = useSelector((state) => state.auth);
+const NoneProtectedRoute = ({ children }) => {
+  const { checkAuthLoading } = useSelector((state) => state.auth);
 
-  if (isLoading) {
+  if (checkAuthLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, user, checkAuthLoading } = useSelector((state) => state.auth);
+
+  if (checkAuthLoading) {
     return <LoadingSpinner />;
   }
 
@@ -45,9 +55,9 @@ const AdminRoute = ({ children }) => {
 };
 
 const UserRoute = ({ children }) => {
-  const { isAuthenticated, user, isLoading } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, checkAuthLoading } = useSelector((state) => state.auth);
 
-  if (isLoading) {
+  if (checkAuthLoading) {
     return <LoadingSpinner />;
   }
 
@@ -63,9 +73,9 @@ const UserRoute = ({ children }) => {
 };
 
 const AuthRoute = ({ children }) => {
-  const { isAuthenticated, user, isLoading } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, checkAuthLoading } = useSelector((state) => state.auth);
 
-  if (isLoading) {
+  if (checkAuthLoading) {
     return <LoadingSpinner />;
   }
 
@@ -76,4 +86,4 @@ const AuthRoute = ({ children }) => {
   return children;
 };
 
-export { AdminRoute, UserRoute, AuthRoute };
+export { AdminRoute, UserRoute, AuthRoute, NoneProtectedRoute };

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_PROD === "production"
   ? import.meta.env.VITE_SHIPPING_API_URL
@@ -12,42 +13,46 @@ const initialState = {
   error: null,
 };
 
-// Async thunk for fetching provinces
 export const fetchProvinces = createAsyncThunk(
   "location/fetchProvinces",
   async () => {
-    const response = await axios.get(`${API_URL}/starter/province`, {
-      headers: {
-        key: import.meta.env.VITE_RAJAONGKIR_KEY,
-      },
-    });
-    console.log("Province request:", response);
-    return response.data.rajaongkir.results;
+    try {
+      const response = await axios.get(`${API_URL}/starter/province`, {
+        headers: {
+          key: import.meta.env.VITE_RAJAONGKIR_KEY,
+        },
+      });
+      return response.data.rajaongkir.results;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
   }
 );
 
-// Async thunk for fetching cities based on province
 export const fetchCities = createAsyncThunk(
   "location/fetchCities",
   async (provinceId) => {
-    const response = await axios.get(`${API_URL}/starter/city`, {
-      params: { province: provinceId },
-      headers: {
-        key: import.meta.env.VITE_RAJAONGKIR_KEY, 
-      },
-    });
-    console.log('kota dari slice',response.data.rajaongkir.results);
-    
-    return response.data.rajaongkir.results;
+    try {
+      const response = await axios.get(`${API_URL}/starter/city`, {
+        params: { province: provinceId },
+        headers: {
+          key: import.meta.env.VITE_RAJAONGKIR_KEY, 
+        },
+      });
+      
+      return response.data.rajaongkir.results;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
   }
 );
 
 const locationSlice = createSlice({
   name: "location",
   initialState,
-  reducers: {
-    setLocation : (state, action) => {}
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchProvinces.pending, (state) => {
@@ -55,16 +60,13 @@ const locationSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProvinces.fulfilled, (state, action) => {
-        console.log('ini dia',action.payload);
         state.isLoading = false;
         state.provinces = action.payload;
       })
       .addCase(fetchProvinces.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message;
-      });
-
-    builder
+      })
       .addCase(fetchCities.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -79,7 +81,5 @@ const locationSlice = createSlice({
       });
   },
 });
-
-export const {setLocation} = locationSlice.actions;
 
 export default locationSlice.reducer;

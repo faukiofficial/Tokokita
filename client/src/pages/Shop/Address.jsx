@@ -13,14 +13,15 @@ import {
   fetchProvinces,
   fetchCities,
 } from "../../store/locationSlice/locationSlice";
-import {ImFileEmpty} from 'react-icons/im'
+import { ImFileEmpty } from "react-icons/im";
+import toast from "react-hot-toast";
 
 const Address = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-const {isAuthenticated} = useSelector((state) => state.auth)
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [formShow, setFormShow] = useState(false);
 
@@ -41,7 +42,6 @@ const {isAuthenticated} = useSelector((state) => state.auth)
     error: addressError,
   } = useSelector((state) => state.address);
 
-
   useEffect(() => {
     dispatch(getAllAddress());
   }, [dispatch]);
@@ -59,19 +59,11 @@ const {isAuthenticated} = useSelector((state) => state.auth)
   });
 
   useEffect(() => {
-    dispatch(fetchProvinces())
-      .unwrap()
-      .catch((err) => {
-        console.log(err.message || "Gagal mengambil provinsi");
-      });
+    dispatch(fetchProvinces());
 
     if (isEdit) {
       if (isAuthenticated) {
-        dispatch(getAddressById({ id: addressId }))
-          .unwrap()
-          .catch((err) => {
-            console.log(err.message || "Gagal mengambil data alamat");
-          });
+        dispatch(getAddressById({ id: addressId }));
       } else {
         navigate("/auth/login");
       }
@@ -99,17 +91,13 @@ const {isAuthenticated} = useSelector((state) => state.auth)
       });
 
       if (currentAddress.provinsi.province_id) {
-        dispatch(fetchCities(currentAddress.provinsi.province_id))
-          .unwrap()
-          .catch((err) => {
-            console.log(err.message || "Gagal mengambil kota");
-          });
+        dispatch(fetchCities(currentAddress.provinsi.province_id));
       }
     }
   }, [isEdit, currentAddress, dispatch]);
 
   const handleChange = (e) => {
-    const { name, value, } = e.target;
+    const { name, value } = e.target;
 
     if (name === "provinsi") {
       setFormData((prev) => ({
@@ -119,11 +107,7 @@ const {isAuthenticated} = useSelector((state) => state.auth)
         postal_code: "",
       }));
       if (value) {
-        dispatch(fetchCities(value))
-          .unwrap()
-          .catch((err) => {
-            console.log(err.message || "Gagal mengambil kota");
-          });
+        dispatch(fetchCities(value));
       }
     } else if (name === "kota") {
       const selectedCity = cities.find((city) => city.city_id === value);
@@ -156,7 +140,7 @@ const {isAuthenticated} = useSelector((state) => state.auth)
 
     for (let field of requiredFields) {
       if (!formData[field]) {
-        console.log(`Field ${field} harus diisi`);
+        toast.error(`Field ${field} harus diisi`);
         return;
       }
     }
@@ -185,17 +169,14 @@ const {isAuthenticated} = useSelector((state) => state.auth)
       },
     };
 
-
-      if (!isAuthenticated) {
-        navigate("/auth/login");
-      }
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+    }
 
     try {
       if (isEdit) {
-        await dispatch(
-          updateAddress({ id: addressId, addressData: payload })
-        ).unwrap();
-        console.log("Alamat berhasil diupdate");
+        dispatch(updateAddress({ id: addressId, addressData: payload })).unwrap();
+
         navigate("/shop/my-address");
         setFormData({
           namaPenerima: "",
@@ -211,7 +192,7 @@ const {isAuthenticated} = useSelector((state) => state.auth)
         setFormShow(false);
       } else {
         await dispatch(addNewAddress({ addressData: payload })).unwrap();
-        console.log("Alamat berhasil ditambahkan");
+
         setFormData({
           namaPenerima: "",
           nomorTelepon: "",
@@ -268,8 +249,8 @@ const {isAuthenticated} = useSelector((state) => state.auth)
                   {address.namaPenerima} | {address.nomorTelepon}
                 </h4>
                 <p>
-                  {address.jalan}, {address.rtrw && 'RT/RW'} {address.rtrw}, {address.kelurahan}, Kec.{" "}
-                  {address.kecamatan}
+                  {address.jalan}, {address.rtrw && "RT/RW"} {address.rtrw},{" "}
+                  {address.kelurahan}, Kec. {address.kecamatan}
                 </p>
                 <p className="mb-2">
                   {address.kota.type === "Kabupaten" ? "Kab." : "Kota"}{" "}
@@ -406,7 +387,7 @@ const {isAuthenticated} = useSelector((state) => state.auth)
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700">Kota</label>
                 <select
@@ -426,7 +407,7 @@ const {isAuthenticated} = useSelector((state) => state.auth)
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700">Kode Pos</label>
                 <input

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineLoading } from "react-icons/ai";
 import { categories, tags } from "../../data/CategriesAndTags";
 import { IoIosClose } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, editProduct, getProductById } from "../../store/productSlice/productSlice";
 import '../../styles/style.css'
+import toast from "react-hot-toast";
 
 const ProductUpload = () => {
   const [title, setTitle] = useState("");
@@ -24,8 +25,9 @@ const ProductUpload = () => {
   const location = useLocation();
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const {isLoading, errorMessage, successMessage, product} = useSelector((state) => state.product)
+  const {errorMessage, product, addProductLoading, editProductLoading} = useSelector((state) => state.product)
 
   const {isAuthenticated} = useSelector((state) => state.auth)
   
@@ -59,7 +61,7 @@ const ProductUpload = () => {
 
   // Fungsi untuk menambahkan titik pada angka
   const formatNumber = (num) => {
-    if (num == null) return ""; // Handle null or undefined
+    if (num == null) return "";
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
@@ -85,7 +87,7 @@ const ProductUpload = () => {
   const handleFileChange = (event) => {
     const newFiles = Array.from(event.target.files);
     if (images.length + newFiles.length > 5) {
-      alert("You can only upload a maximum of 5 images.");
+      toast.error("You can only upload a maximum of 5 images.");
       return;
     }
     setImages((prevImages) => [...prevImages, ...newFiles]);
@@ -95,7 +97,7 @@ const ProductUpload = () => {
     event.preventDefault();
     const newFiles = Array.from(event.dataTransfer.files);
     if (images.length + newFiles.length > 5) {
-      alert("You can only upload a maximum of 5 images.");
+      toast.error("You can only upload a maximum of 5 images.");
       return;
     }
     setImages((prevImages) => [...prevImages, ...newFiles]);
@@ -116,7 +118,6 @@ const ProductUpload = () => {
       ]);
     }
 
-    // Hapus gambar dari state `images`
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
@@ -184,7 +185,7 @@ const ProductUpload = () => {
 
 
     if (selectedTags.length === 0) {
-      alert("Please select at least one tag.");
+      toast.error("Please select at least one tag.");
       return;
     }
 
@@ -208,23 +209,21 @@ const ProductUpload = () => {
 
     try {
       if (productId) {
-        dispatch(editProduct({formData, productId}))
+        const result = await dispatch(editProduct({formData, productId}))
+        if (result.meta.requestStatus === "fulfilled") {
+          navigate("/admin/products");
+        }
       } else {
-        dispatch(addProduct({formData}))
+        const result = await dispatch(addProduct({formData}))
+        if (result.meta.requestStatus === "fulfilled") {
+          navigate("/admin/products");
+        }
       }
 
     } catch (error) {
-      console.error("Error saving product:", error);
       setError(error)
     }
   };
-
-  useEffect(() => {
-    if (successMessage) {
-      window.location.href = `/admin/products`;
-      resetForm();
-    }
-  }, [successMessage])
 
   return (
     <div className="mx-auto px-5 p-4 md:px-10 border bg-white pb-10">
@@ -437,10 +436,10 @@ const ProductUpload = () => {
         <button
           type="submit"
           className="w-full px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-md shadow-sm focus:outline-none"
-          disabled={isLoading}
+          disabled={addProductLoading || editProductLoading}
         >
           <div className="flex items-center justify-center gap-2">
-            {isLoading && (
+            {addProductLoading || editProductLoading && (
               <span className="animate-spin text-xl">
                 <AiOutlineLoading />
               </span>

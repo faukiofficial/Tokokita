@@ -47,7 +47,6 @@ exports.register = async (req, res) => {
       success: false,
       message: "Register Failed",
     });
-    console.log("Error in registerUser controller", error);
   }
 };
 
@@ -62,55 +61,54 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne(query);
     if (!user) {
-      return res.status(404).json({ message: "Invalid user or password" });
+      return res.status(404).json({ success: false, message: "Invalid user or password" });
     }
 
     const isMatch = await bcrypts.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid user or password" });
+      return res.status(400).json({ success: false, message: "Invalid user or password" });
     }
 
     const token = jwt.sign(
       {
-        id: user.id,
-        fullName: user.fullName,
-        userId: user._id,
-        userName: user.userName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        profilePicture: user.profilePicture,
-        role: user.role,
-        addresses: user.addresses,
-        orders: user.orders,
-        userCartItems: user.userCartItems,
+        userId: user._id
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "30m" }
     );
 
+    const refreshToken = jwt.sign(
+      {
+        userId: user._id
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    )
+
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      domaon: ".onrender.com",
+      expires: new Date(Date.now() + 30 * 60 * 1000),
+      maxAge: 30 * 60 * 1000,
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
     });
+
+    res.cookie("refreshToken", refreshToken, {
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      maxAge: 30 * 24 * 30 * 60 * 1000,
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+
+    user.password = undefined;
 
     res.status(200).json({
       success: true,
       message: "Login Successfully",
-      user: {
-        fullName: user.fullName,
-        _id: user._id,
-        userName: user.userName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        profilePicture: user.profilePicture, 
-        role: user.role,
-        addresses: user.addresses,
-        orders: user.orders,
-        userCartItems: user.userCartItems,
-      },
+      user,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Login Failed" });
@@ -121,18 +119,24 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      domaon: ".onrender.com",
-    })
-    
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
+
     res.status(200).json({
       success: true,
       message: "Logout Successfully",
     });
   } catch (error) {
-    console.log("Error in logoutUser controller", error);
     res.status(500).json({
       success: false,
       message: "Logout Failed",
@@ -146,23 +150,14 @@ exports.editProfile = async (req, res) => {
     const userId = req.params.id;
     const { fullName, phoneNumber, email, userName } = req.body;
 
-    console.log("Received data:", req.body);
-
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+      return res.status(404).json({ success: false, message: "User tidak ditemukan." });
     }
-
 
     if (req.file) {
       if (user.profilePicture && user.profilePicture.publicId) {
-        console.log(
-          "Deleting old image with publicId:",
-          user.profilePicture.publicId
-        );
         await deleteImageUtil(user.profilePicture.publicId);
-      } else {
-        console.log("No previous profile picture to delete.");
       }
       const uploadResult = await imageUploadUtil(req.file.buffer);
       user.profilePicture = {
@@ -182,11 +177,9 @@ exports.editProfile = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Profil berhasil diperbarui.", user });
   } catch (error) {
-    console.log("Error di edit profile controller:", error);
-
     res
       .status(500)
-      .json({ message: "Terjadi kesalahan saat memperbarui profil.", error });
+      .json({ success: false, message: "Terjadi kesalahan saat memperbarui profil.", error });
   }
 };
 
@@ -195,32 +188,45 @@ exports.deleteProfile = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    console.log('user id delete', userId);
-    
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+      return res.status(404).json({ success: false, message: "User tidak ditemukan." });
     }
 
     if (user.profilePicture && user.profilePicture.publicId) {
-      const deleteResult = await deleteImageUtil(user.profilePicture.publicId);
-      console.log("Delete Result:", deleteResult);
-    } else {
-      console.log("No profile picture to delete.");
+      await deleteImageUtil(user.profilePicture.publicId);
     }
 
     await User.findByIdAndDelete(userId);
 
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    });
 
     req.user = null;
 
-    res.status(200).json({ message: "Akun berhasil dihapus." });
+    res.status(200).json({ success: true, message: "Akun berhasil dihapus." });
   } catch (error) {
-    console.log('Error di deletePofile controller', error.message);
-    
     res
       .status(500)
       .json({ message: "Terjadi kesalahan saat menghapus akun.", error });
   }
 };
+
+exports.getUserInfo = async (req, res) => {
+  try {
+    const user = req.user;
+
+    res.status(200).json({
+      success: true,
+      message: "Authenticated User",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({  success: false, message: "Unauthorized" });
+  }
+}

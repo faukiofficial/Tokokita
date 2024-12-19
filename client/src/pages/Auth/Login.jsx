@@ -12,10 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { isLoading, error, user, isAuthenticated } = useSelector((state) => state.auth);
-
-  console.log('login user', user)
-  console.log('auth login', isAuthenticated)
+  const { loginLoading, error, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     document.title = "Login - Shopping App";
@@ -104,10 +101,10 @@ const Login = () => {
             <button
               type="submit"
               className="bg-primary hover:bg-primary-hover text-white w-full py-2 rounded"
-              disabled={isLoading}
+              disabled={loginLoading}
             >
               <div className="flex items-center justify-center gap-2">
-                {isLoading && (
+                {loginLoading && (
                   <span className="animate-spin text-xl">
                     <AiOutlineLoading />
                   </span>
@@ -125,14 +122,6 @@ const Login = () => {
               className="font-semibold hover:underline cursor-pointer"
             >
               Register
-            </Link>
-          </p>
-          <p className="mt-5 text-sm">
-            <Link
-              to="/auth/forget-password"
-              className="font-semibold hover:underline cursor-pointer"
-            >
-              Forget Password?
             </Link>
           </p>
         </div>

@@ -15,7 +15,6 @@ exports.createAddress = async (req, res) => {
       provinsi,
     } = req.body;
 
-    // Validasi keberadaan objek provinsi dan kota
     if (!provinsi || !provinsi.province_id || !provinsi.province) {
       return res
         .status(400)
@@ -51,9 +50,9 @@ exports.createAddress = async (req, res) => {
     req.user.addresses.push(address._id);
     await req.user.save();
 
-    res.status(201).json({ success: true, address });
+    res.status(201).json({ success: true, address, message: "Address created" });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: "Error creating address" });
   }
 };
 
@@ -63,7 +62,7 @@ exports.getAllAddresses = async (req, res) => {
     const addressList = await Address.find({ user: req.user.id });
     res.status(200).json({ success: true, addressList });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error fetching addresses" });
   }
 };
 
@@ -79,9 +78,9 @@ exports.getAddressById = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Address not found" });
     }
-    res.status(200).json({ success: true, address });
+    res.status(200).json({ success: true, address, message: "Address found" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error fetching address" });
   }
 };
 
@@ -131,18 +130,15 @@ exports.updateAddress = async (req, res) => {
 
     await address.save();
 
-    res.status(200).json({ success: true, address });
+    res.status(200).json({ success: true, address, message: "Address updated" });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: "Error updating address" });
   }
 };
 
 // Delete Address
 exports.deleteAddress = async (req, res) => {
   try {
-    console.log("Address ID:", req.params.id);
-    console.log("User ID:", req.user.id);
-
     const addressId = req.params.id;
     const userId = req.user.id;
 
@@ -159,7 +155,6 @@ exports.deleteAddress = async (req, res) => {
 
     console.log("Address found, removing from user...");
 
-    // Hapus referensi alamat dari array addresses di User menggunakan $pull
     const updateUser = await User.findByIdAndUpdate(
       userId,
       { $pull: { addresses: addressId } },
@@ -172,13 +167,10 @@ exports.deleteAddress = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log("Address ID removed from user:", addressId);
-    console.log("User Addresses After Deletion:", updateUser.addresses);
-
     res
       .status(200)
       .json({ success: true, message: "Address deleted successfully" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error deleting address" });
   }
 };

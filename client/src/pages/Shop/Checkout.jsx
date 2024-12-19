@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProductById } from "../../store/productSlice/productSlice";
 import { checkout } from "../../store/orderSlice/orderSlice";
@@ -15,17 +15,11 @@ const Checkout = () => {
   const dispatch = useDispatch();
 
   const { selectedItems } = location.state;
-  const { isCheckoutLoading, successMessage } = useSelector(
-    (state) => state.order
-  );
+  const { isCheckoutLoading } = useSelector((state) => state.order);
   const { addresses } = useSelector((state) => state.address);
   const { isLoading } = useSelector((state) => state.product);
   const { storeProfile } = useSelector((state) => state.storeProfile);
-  const {
-    costs,
-  } = useSelector((state) => state.shipping);
-
-  console.log("kota asal", storeProfile?.alamat?.kota?.city_id);
+  const { costs } = useSelector((state) => state.shipping);
 
   const [fetchedProducts, setFetchedProducts] = useState([]);
   const [selectedShippingOption, setSelectedShippingOption] = useState(null);
@@ -129,7 +123,6 @@ const Checkout = () => {
     const productIds = fetchedProducts.map((product) => product._id);
 
     productIds.forEach((id) => {
-      console.log("product id untuk remove", id);
       dispatch(removeFromCart({ productId: id }));
     });
   };
@@ -147,7 +140,6 @@ const Checkout = () => {
 
     dispatch(checkout({ orderData }))
       .then((response) => {
-        console.log("checkout success jalaaaaan", response);
         if (response.payload.success) {
           navigate("/shop/payment", {
             state: {
@@ -176,7 +168,18 @@ const Checkout = () => {
       <h2 className="text-2xl font-semibold mb-4">Checkout Summary</h2>
 
       <div className="mb-7 border-b pb-3">
-        <h3 className="text-xl font-semibold mb-2">Pilih Alamat:</h3>
+        <h3 className="text-xl font-semibold mb-2">
+          Pilih Alamat:{" "}
+          {addresses.length === 0 && (
+            <div className="text-red-500 text-sm">
+              {" "}
+              Tidak ada alamat{" "}
+              <Link to="/shop/my-address">
+                <span className="text-primary underline">Tambah Alamat</span>
+              </Link>
+            </div>
+          )}
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {addresses.map((address) => (
             <div

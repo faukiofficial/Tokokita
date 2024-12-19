@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_ADDRESS_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -15,18 +16,19 @@ const initialState = {
 export const createStoreProfile = createAsyncThunk(
   "storeProfile/createStoreProfile",
   async ({ storeProfileData }) => {
-    console.log("storeProfileData dari slice", storeProfileData);
     try {
       const response = await axios.post(`${STORE_PROFILE_URL}/add`, storeProfileData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return response.data.storeProfile;
     } catch (error) {
-      const message = error.response?.data?.message;
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -37,10 +39,11 @@ export const getStoreProfile = createAsyncThunk(
   async () => {
     try {
       const response = await axios.get(`${STORE_PROFILE_URL}/get`);
+      
       return response.data.storeProfile;
     } catch (error) {
-      const message = error.response?.data?.message;
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );
@@ -49,7 +52,6 @@ export const getStoreProfile = createAsyncThunk(
 export const updateStoreProfile = createAsyncThunk(
   "storeProfile/updateStoreProfile",
   async ({ storeProfileData }) => {
-    console.log("storeProfileData dari slice", storeProfileData);
     try {
       const response = await axios.put(
         `${STORE_PROFILE_URL}/update`,
@@ -60,11 +62,13 @@ export const updateStoreProfile = createAsyncThunk(
           },
         }
       );
-
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
       return response.data.storeProfile;
     } catch (error) {
-      const message = error.response?.data?.message;
-      throw new Error(message);
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
     }
   }
 );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth, editProfile } from "../../store/auth-slice/authSlice";
+import { editProfile } from "../../store/auth-slice/authSlice";
 import { deleteProfile } from "../../store/auth-slice/authSlice";
 
 const EditProfile = () => {
@@ -11,14 +11,9 @@ const EditProfile = () => {
     userName: "",
     profilePicture: null,
   });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-
-  console.log("user di page edit", user);
+  const { user, editProfileLoading } = useSelector((state) => state.auth);
 
   useEffect(() => {
     document.title = "Profile | Shopping App";
@@ -68,9 +63,6 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    setMessage("");
 
     const formData = new FormData();
     formData.append("fullName", profile.fullName);
@@ -81,23 +73,7 @@ const EditProfile = () => {
       formData.append("profilePicture", profile.profilePicture);
     }
 
-    console.log("inini", formData);
-
-    try {
-      const result = await dispatch(
-        editProfile({ userId: user._id, formData })
-      );
-      if (result) {
-        const authResult = await dispatch(checkAuth());
-        console.log("Updated user after edit:", authResult);
-      }
-      setMessage("Profile updated successfully!");
-    } catch (err) {
-      console.log(err);
-      setError("Failed to update profile.");
-    } finally {
-      setLoading(false);
-    }
+    dispatch(editProfile({ userId: user._id, formData }));
   };
 
   const handleDeleteProfile = () => {
@@ -116,8 +92,6 @@ const EditProfile = () => {
           Delete Account
         </button>
       </div>
-      {error && <p className="text-red-500">{error}</p>}
-      {message && <p className="text-green-500">{message}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           {profile.profilePicture ? (
@@ -212,9 +186,9 @@ const EditProfile = () => {
         <button
           type="submit"
           className="py-2 px-5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors duration-200"
-          disabled={loading}
+          disabled={editProfileLoading}
         >
-          {loading ? "Saving..." : "Save Changes"}
+          {editProfileLoading ? "Saving..." : "Save Changes"}
         </button>
       </form>
     </div>
