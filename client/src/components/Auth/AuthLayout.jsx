@@ -1,6 +1,7 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 const AuthLayout = () => {
+  const navigate = useNavigate();
 
   return (
     <div className="bg-slate-100">
@@ -8,7 +9,7 @@ const AuthLayout = () => {
         <div className="flex items-center space-x-2">
           <div
             className="text-2xl font-bold  text-primary cursor-pointer"
-            onClick={() => (window.location.href = "/shop/products")}
+            onClick={() => navigate("/shop/products")}
           >
             Tokokita
           </div>

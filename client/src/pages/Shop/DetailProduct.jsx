@@ -320,7 +320,7 @@ const DetailProduct = () => {
                 BATAL
               </button>
               <button
-                onClick={() => (window.location.href = "/auth/login")}
+                onClick={() => navigate("/auth/login")}
                 className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover"
               >
                 LOGIN
