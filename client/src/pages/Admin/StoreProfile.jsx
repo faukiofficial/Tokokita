@@ -21,6 +21,10 @@ const StoreProfile = () => {
     (state) => state.auth
   );
 
+  useEffect(() => {
+    document.title = "Store Profile | Shopping App";
+  }, []);
+
   const {
     provinces,
     cities,

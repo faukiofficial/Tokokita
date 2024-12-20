@@ -209,6 +209,17 @@ const checkoutSlice = createSlice({
       .addCase(uploadPaymentProof.fulfilled, (state, action) => {
         state.isUploadingProof = false;
         state.proofUploadSuccess = true;
+        state.orders = state.orders.map((order) => {
+          if (order._id === action.payload.order._id) {
+            return {
+              ...order,
+              paymentProof: action.payload.order.paymentProof,
+              paymentStatus: action.payload.order.paymentStatus,
+              updatedAt: action.payload.order.updatedAt,
+            };
+          }
+          return order;
+        })
         const updatedOrder = action.payload.order;
 
         if (updatedOrder) {

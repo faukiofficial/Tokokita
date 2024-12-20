@@ -65,7 +65,6 @@ export const removeFromCart = createAsyncThunk(
 
       return { data: response.data, productId };
     } catch (error) {
-      toast.error(error.response.data.message);
       throw new Error(error.response.data.message);
     }
   }

@@ -8,9 +8,11 @@ import moment from "moment";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import formatNumber from "../../components/helpers/formatNumber";
 import { IoIosClose } from "react-icons/io";
+import { useLocation } from "react-router-dom";
 
 const AllOrders = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showPaymentProof, setShowPaymentProof] = useState(false);
@@ -21,6 +23,10 @@ const AllOrders = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
+
+  useEffect(() => {
+    document.title = "All Orders | Shopping App";
+  }, [location]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -175,7 +181,7 @@ const AllOrders = () => {
                               updateOrderStatus({
                                 orderId: order._id,
                                 newStatus: "process",
-                                products: order.items
+                                products: order.items,
                               })
                             );
                           }}
@@ -288,10 +294,16 @@ const AllOrders = () => {
       </div>
 
       {showPaymentProof && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="flex flex-col justify-between items-center bg-white mx-4 relative  max-w-[400px]">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowPaymentProof(false)}
+        >
+          <div
+            className="relative flex flex-col justify-between items-center bg-white mx-4 max-w-[400px] overflow-y-scroll overflow-hidden max-h-[90%]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div
-              className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 absolute -top-2 -right-2"
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 top-2 self-end mr-2 sticky cursor-pointer"
               onClick={() => {
                 setSelectedOrder(null);
                 setShowPaymentProof(false);
