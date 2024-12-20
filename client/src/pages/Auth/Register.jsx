@@ -5,6 +5,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../store/auth-slice/authSlice";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,7 +13,7 @@ const Register = () => {
   const location = useLocation();
 
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const { logoutLoading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -57,7 +58,7 @@ const Register = () => {
         .required("Confirm Password is required"),
     }),
     onSubmit: async (values) => {
-      const result = await dispatch(registerUser(values))
+      const result = await dispatch(registerUser(values));
 
       if (result.meta.requestStatus === "fulfilled") {
         formik.resetForm();
@@ -167,7 +168,11 @@ const Register = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-2 top-2"
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? (
+                  <FaRegEyeSlash className="text-xl" />
+                ) : (
+                  <FaRegEye className="text-xl" />
+                )}
               </button>
             </div>
             {formik.touched.password && formik.errors.password && (
@@ -196,7 +201,11 @@ const Register = () => {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-2 top-2"
               >
-                {showConfirmPassword ? "Hide" : "Show"}
+                {showConfirmPassword ? (
+                  <FaRegEyeSlash className="text-xl" />
+                ) : (
+                  <FaRegEye className="text-xl" />
+                )}
               </button>
             </div>
             {formik.touched.confirmPassword &&
