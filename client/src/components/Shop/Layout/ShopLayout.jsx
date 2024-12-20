@@ -309,7 +309,7 @@ const ShopLayout = () => {
         ) : (
           <button
             className="hover:bg-red-100 border border-red-500 px-6 py-1 rounded"
-            onClick={() => (window.location.href = "/auth/login")}
+            onClick={() => navigate("/auth/login")}
           >
             <div className="flex items-center justify-center gap-2">
               <span className="font-semibold">LOGIN</span>{" "}

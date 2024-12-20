@@ -79,7 +79,7 @@ const AuthRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && user && !checkAuthLoading) {
     return user?.role === "admin" ? <Navigate to="/admin/products" /> : <Navigate to="/shop/products" />;
   }
 
