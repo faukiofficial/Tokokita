@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import formatNumber from "../../components/helpers/formatNumber";
 import { useDispatch, useSelector } from "react-redux";
-import { uploadPaymentProof } from "../../store/orderSlice/orderSlice";
+// import { uploadPaymentProof } from "../../store/orderSlice/orderSlice";
 import toast from "react-hot-toast";
+import { newPayment } from "../../store/orderSlice/orderSlice";
 
 const PaymentPage = () => {
-  const [paymentProof, setPaymentProof] = useState(null);
+  // const [paymentProof, setPaymentProof] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [midtransToken, setMidtransToken] = useState(null);
+  const { newPaymentLoading } = useSelector((state) => state.order);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -17,6 +20,7 @@ const PaymentPage = () => {
     proofUploadSuccess,
     proofUploadError,
   } = useSelector((state) => state.order);
+  const {user} = useSelector((state) => state.auth);
 
   const location = useLocation();
   const {
@@ -39,32 +43,121 @@ const PaymentPage = () => {
 
   const totalToPay = totalWithoutShipping + shippingCost;
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPaymentProof(file);
-      const preview = URL.createObjectURL(file);
-      setPreviewUrl(preview);
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setPaymentProof(file);
+  //     const preview = URL.createObjectURL(file);
+  //     setPreviewUrl(preview);
+  //   } else {
+  //     setPaymentProof(null);
+  //     setPreviewUrl(null);
+  //   }
+  // };
+
+  // const handleConfirmPayment = async () => {
+  //   if (!paymentProof) {
+  //     toast.error("Silakan unggah bukti transfer.");
+  //     return;
+  //   }
+
+  //   dispatch(uploadPaymentProof({ orderId, paymentProof }));
+  // };
+
+  // useEffect(() => {
+  //   if (proofUploadSuccess) {
+  //     navigate("/shop/my-orders");
+  //   }
+  // }, [navigate, proofUploadSuccess]);
+
+  // Midtrans
+  const handleBuy = async () => {
+    if (course && userInfo) {
+      const item_details = {
+        id: course._id,
+        quantity: 1,
+        price: course.price,
+        name: course.name,
+      };
+
+      const customer_details = {
+        name: user?.name,
+        email: user?.email,
+      };
+
+      try {
+        const transaction = await dispatch(
+          newPayment({
+            order_id: `${orderId}-${Date.now()}`,
+            gross_amount: totalToPay,
+            item_details: item_details,
+            customer_details: customer_details,
+          })
+        );
+
+        if (transaction.payload?.success) {
+          setMidtransToken(transaction.payload.token);
+        } else {
+          toast.error(
+            transaction.payload?.message ||
+              "Failed to create payment transaction."
+          );
+        }
+      } catch (error) {
+        console.error("Payment failed:", error);
+        toast.error(
+          "An error occurred while processing the payment. Please try again."
+        );
+      }
     } else {
-      setPaymentProof(null);
-      setPreviewUrl(null);
+      toast.error("Please Login")
     }
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!paymentProof) {
-      toast.error("Silakan unggah bukti transfer.");
-      return;
-    }
-
-    dispatch(uploadPaymentProof({ orderId, paymentProof }));
   };
 
   useEffect(() => {
-    if (proofUploadSuccess) {
-      navigate("/shop/my-orders");
+    if (midtransToken) {
+      window.snap.pay(midtransToken, {
+        onSuccess: async (result) => {
+          console.log("Result", result)
+          if (orderId) {
+            toast.success("Payment success");
+            const data = {
+              courseId: orderId,
+              payment_info: "Paid"
+            }
+            const process = await dispatch(createOrder(data));
+            if (process.meta.requestStatus === "fulfilled") {
+              dispatch(updateUserCourses({ _id: course?._id}));
+            }
+            setMidtransToken(null);
+            navigate("/shop/my-orders");
+          }
+        },
+        onError: () => {
+          toast.error("Payment error");
+          setMidtransToken(null);
+        },
+      });
     }
-  }, [navigate, proofUploadSuccess]);
+  }, [midtransToken]);
+
+
+  useEffect(() => {
+    const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+
+    const scriptTag = document.createElement("script");
+    scriptTag.src = midtransScriptUrl;
+
+    const myMidtransClientKey = import.meta.env
+      .VITE_MIDTRANS_CLIENT_KEY;
+    scriptTag.setAttribute("data-client-key", myMidtransClientKey);
+
+    document.body.appendChild(scriptTag);
+
+    return () => {
+      document.body.removeChild(scriptTag);
+    };
+  }, []);
 
   return (
     <div className="p-6 bg-white">

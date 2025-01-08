@@ -19,6 +19,8 @@ const initialState = {
   isUploadingProof: false,
   proofUploadSuccess: false,
   proofUploadError: null,
+  newPaymentLoading: false,
+  newPaymentError: null,
 };
 
 export const checkout = createAsyncThunk(
@@ -141,6 +143,28 @@ export const updateOrderStatus = createAsyncThunk(
         toast.success(response.data.message);
       }
 
+      return response.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
+  }
+);
+
+export const newPayment = createAsyncThunk(
+  "/order/newPayment",
+  async ({ order_id, gross_amount, items_details, customer_details }) => {
+    try {
+      const response = await axios.post(
+        `${ORDER_URL}/new-payment`,
+        { order_id, gross_amount, items_details, customer_details },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
       return response.data;
     } catch (error) {
       toast.error(error.response.data.message);
@@ -305,6 +329,18 @@ const checkoutSlice = createSlice({
         state.isUpdatingStatus = false;
         state.updateStatusError =
           action.payload || "Failed to update order status.";
+      })
+      .addCase(newPayment.pending, (state) => {
+        state.newPaymentLoading = true;
+        state.newPaymentError = null;
+      })
+      .addCase(newPayment.fulfilled, (state) => {
+        state.newPaymentLoading = false;
+        state.newPaymentSuccess = true;
+      })
+      .addCase(newPayment.rejected, (state, action) => {
+        state.newPaymentLoading = false;
+        state.newPaymentError = action.payload;
       });
   },
 });

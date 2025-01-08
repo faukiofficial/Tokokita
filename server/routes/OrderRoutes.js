@@ -29,5 +29,6 @@ router.get('/all', checkAuth, checkRole(['admin']), OrderController.getAllOrders
 router.get('/user-orders', checkAuth, checkRole(['user', 'admin']), OrderController.getUserOrders);
 router.post('/upload-payment-proof', checkAuth, checkRole(['user']), upload.single('paymentProof'), OrderController.uploadPaymentProof);
 router.put('/update-status/:orderId', checkAuth, checkRole(['user','admin']), OrderController.updateOrderStatus);
+router.post('/new-payment', checkAuth, checkRole(['user']), OrderController.newPayment);
 
 module.exports = router;

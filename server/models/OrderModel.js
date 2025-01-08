@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
   },
   trackingCode: { type: String, },
   selectedShippingCode: { type: String, },
-  status: { type: String, enum: ['pending', 'process', 'ondelivery', 'completed', 'cancelled'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'paid', 'process', 'ondelivery', 'completed', 'cancelled'], default: 'pending' },
   paymentStatus: { type: String, enum: ['unpaid', 'paid'], default: 'unpaid' },
   paymentProof: { type: String },
 }, { timestamps: true });

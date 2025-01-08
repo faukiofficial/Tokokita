@@ -2,6 +2,7 @@ const Order = require("../models/OrderModel");
 const Product = require("../models/ProductModel");
 const Address = require("../models/AddressModel"); // Pastikan model Address diimpor
 const { imageUploadUtil } = require("../config/cloudinary");
+const midtransClient = require("midtrans-client");
 
 // Create an Order (Checkout)
 exports.createOrder = async (req, res) => {
@@ -314,3 +315,40 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating order status" });
   }
 };
+
+
+// MIDTRANS PAYMENT GATEWAY
+
+const snap = new midtransClient.Snap({
+  isProduction: false,
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY,
+});
+
+exports.newPayment = async (req, res) => {
+  try {
+    const {order_id, gross_amount, items_details, customer_details} = req.body;
+
+    const parameter = {
+      transaction_details: {
+        order_id: order_id,
+        gross_amount: gross_amount,
+      },
+      item_details: items_details,
+      customer_details: customer_details,
+    };
+
+    const transaction = await snap.createTransaction(parameter);
+
+    if (transaction) {
+      res.status(200).json({
+        success: true,
+        message: "Transaction created successfully",
+        token: transaction.token,
+        redirect_url: transaction.redirect_url,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error creating payment" });
+  }
+}
